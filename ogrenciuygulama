@@ -1,0 +1,18 @@
+internal class Program
+{
+    private static void Main(string[] args)
+    {
+    string ad, soyad; //Metinsel iki değişken atadım
+       Console.WriteLine("Adınızı giriniz:"); //consola yazı yazdırma
+    ad = Console.ReadLine(); // girilen degerin okunması
+       Console.WriteLine("Soyadınızı giriniz:");
+    soyad = Console.ReadLine();
+
+    int ogrencino, tel; //sayısal iki değişken atadım
+       Console.WriteLine("Ögrenci numaranızı giriniz:");
+    ogrencino = Convert.ToInt32(Console.ReadLine());// burada sayısal verileri okuması için metinsel ifadeye dönüştürdüm(string türünde parametre alır ve bir int döndürür)
+       Console.WriteLine("Telefon numaranızı Giriniz:");
+    tel = Convert.ToInt32(Console.ReadLine());
+       Console.ReadKey(); //consolun işlem bitene kadar açık kalması için
+    }
+}
