@@ -1,0 +1,20 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace uyg5
+{
+    internal class Araclar
+    {
+        public string renk = "kırmızı";
+        public string model = "model";
+        public int yas = 5;
+        public int tekersayisi = 4;
+    }
+
+    public int YasHesapla(int yil, int modelyili) { }
+        return yil-modelyili;
+        }
+}
