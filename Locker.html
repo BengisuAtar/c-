@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Locker — Şifre Kasası</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: rgba(99,179,237,0.15);
+    --border-hover: rgba(99,179,237,0.4);
+    --accent: #3b82f6;
+    --accent2: #06b6d4;
+    --accent-glow: rgba(59,130,246,0.3);
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --red: #ef4444;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --mono: 'Space Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 20%, rgba(59,130,246,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(6,182,212,0.06) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { position: relative; z-index: 1; }
+
+  /* ===== LOGIN SCREEN ===== */
+  #login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+
+  .login-card {
+    width: 100%;
+    max-width: 440px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 48px 40px;
+    box-shadow: 0 0 60px rgba(59,130,246,0.1), 0 20px 60px rgba(0,0,0,0.5);
+    animation: cardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .logo-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    box-shadow: 0 0 30px var(--accent-glow);
+    animation: pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 20px var(--accent-glow); }
+    50% { box-shadow: 0 0 40px rgba(59,130,246,0.5); }
+  }
+
+  .logo-title {
+    font-family: var(--mono);
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #fff 40%, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .logo-sub {
+    font-size: 13px;
+    color: var(--text3);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 100px;
+    font-size: 11px;
+    color: var(--accent2);
+    font-family: var(--mono);
+    margin-top: 4px;
+  }
+
+  .field-group { margin-bottom: 20px; }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 8px;
+  }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 14px;
+    font-size: 16px;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  input[type="email"], input[type="password"], input[type="text"], input[type="url"], textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s;
+    padding: 12px 16px 12px 42px;
+  }
+
+  input:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  textarea {
+    resize: none;
+    padding-left: 16px;
+    height: 88px;
+  }
+
+  .hint { font-size: 11px; color: var(--text3); margin-top: 6px; }
+  .hint.warn { color: var(--yellow); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white;
+    box-shadow: 0 4px 20px var(--accent-glow);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 30px rgba(59,130,246,0.5);
+  }
+
+  .btn-ghost {
+    background: rgba(255,255,255,0.06);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: var(--border-hover); }
+
+  .btn-danger { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .btn-danger:hover { background: rgba(239,68,68,0.25); }
+
+  .btn-sm { padding: 8px 14px; font-size: 13px; }
+  .btn-icon { padding: 9px; border-radius: 8px; }
+
+  .security-info {
+    margin-top: 28px;
+    padding: 16px;
+    background: rgba(59,130,246,0.05);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 12px;
+    color: var(--text3);
+    line-height: 1.7;
+  }
+
+  .security-info strong { color: var(--text2); }
+
+  /* ===== MAIN APP ===== */
+  #app-screen { display: none; min-height: 100vh; }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,14,26,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .topbar-logo {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff 40%, var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .topbar-user {
+    font-size: 12px;
+    color: var(--text3);
+    padding: 4px 10px;
+    background: var(--surface2);
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+  .main-content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .section-title {
+    font-family: var(--mono);
+    font-size: 20px;
+    color: var(--text);
+  }
+
+  .count-badge {
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--mono);
+    margin-top: 2px;
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: border-color 0.2s;
+  }
+
+  .stat-card:hover { border-color: var(--border-hover); }
+  .stat-num { font-family: var(--mono); font-size: 28px; font-weight: 700; color: var(--accent2); }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Search */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 20px;
+  }
+
+  .search-wrap .input-icon { font-size: 14px; }
+  #search-input { padding: 11px 16px 11px 40px; width: 100%; }
+
+  /* Password cards */
+  .pwd-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .pwd-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+    transition: all 0.2s;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .pwd-card:hover { border-color: var(--border-hover); box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+
+  .pwd-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 12px;
+  }
+
+  .pwd-title { font-size: 17px; font-weight: 600; color: var(--text); }
+  .pwd-url { font-size: 12px; color: var(--accent); text-decoration: none; margin-top: 2px; display: block; }
+  .pwd-url:hover { text-decoration: underline; }
+
+  .pwd-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .pwd-fields { display: flex; flex-direction: column; gap: 8px; }
+
+  .pwd-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+
+  .field-label {
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    width: 80px;
+    flex-shrink: 0;
+    font-family: var(--mono);
+  }
+
+  .field-value {
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text);
+    flex: 1;
+    word-break: break-all;
+  }
+
+  .toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 2px;
+    font-size: 14px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .toggle-btn:hover { color: var(--accent); }
+
+  .copy-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 2px 6px;
+    font-size: 12px;
+    transition: all 0.2s;
+    border-radius: 4px;
+    flex-shrink: 0;
+    font-family: var(--mono);
+  }
+
+  .copy-btn:hover { color: var(--accent2); background: rgba(6,182,212,0.1); }
+  .copy-btn.copied { color: var(--green); }
+
+  .pwd-notes {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .pwd-footer {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text3);
+  }
+
+  .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.3; }
+  .empty-title { font-size: 18px; color: var(--text2); margin-bottom: 8px; }
+  .empty-sub { font-size: 14px; }
+
+  /* Loading */
+  .loading-state {
+    text-align: center;
+    padding: 80px 20px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 80px rgba(59,130,246,0.1);
+    animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .modal-header {
+    padding: 24px 28px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .modal-title {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .modal-body { padding: 0 28px 28px; }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .modal-actions .btn-primary { flex: 1; }
+
+  /* Notification */
+  #notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 360px;
+  }
+
+  #notification.show { transform: translateX(0); }
+  #notification.success { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3); color: var(--green); }
+  #notification.error { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--red); }
+  #notification.warning { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); color: var(--yellow); }
+
+  /* Emergency panel */
+  .emergency-panel {
+    display: none;
+    background: rgba(239,68,68,0.07);
+    border: 1px solid rgba(239,68,68,0.25);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+
+  .emergency-panel.open { display: block; }
+  .emergency-title { color: var(--red); font-weight: 600; margin-bottom: 8px; }
+  .emergency-desc { font-size: 13px; color: var(--text2); margin-bottom: 12px; line-height: 1.6; }
+  .emergency-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Password strength */
+  .strength-bar {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--surface2);
+    margin-top: 6px;
+    overflow: hidden;
+  }
+
+  .strength-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  .strength-text { font-size: 11px; margin-top: 4px; }
+
+  /* Gen password row */
+  .pwd-input-row { display: flex; gap: 8px; }
+  .pwd-input-row input { flex: 1; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .stats-row .stat-card:last-child { grid-column: 1 / -1; }
+    .login-card { padding: 32px 24px; }
+    .modal-header { padding: 20px 20px 0; }
+    .modal-body { padding: 0 20px 20px; }
+    .topbar-user { display: none; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+</style>
+</head>
+<body>
+
+<!-- NOTIFICATION -->
+<div id="notification"></div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen" class="container">
+  <div class="login-card">
+    <div class="logo-wrap">
+      <div class="logo-icon">🔐</div>
+      <div class="logo-title">LOCKER</div>
+      <div class="logo-sub">Şifre Kasası</div>
+      <div class="badge">🔒 AES-256 · Sıfır Bilgi</div>
+    </div>
+
+    <div class="field-group">
+      <label>E-posta Adresi</label>
+      <div class="input-wrap">
+        <span class="input-icon">✉️</span>
+        <input type="email" id="login-email" placeholder="ornek@email.com" autocomplete="email" />
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Ana Şifre</label>
+      <div class="input-wrap">
+        <span class="input-icon">🗝️</span>
+        <input type="password" id="login-master" placeholder="Ana şifrenizi girin" autocomplete="current-password" />
+      </div>
+      <p class="hint warn">⚠️ Bu şifreyi unutursanız verilerinize bir daha erişemezsiniz.</p>
+    </div>
+
+    <button class="btn btn-primary" onclick="handleLogin()">
+      <span>🔓</span> Locker'a Giriş Yap
+    </button>
+
+    <div class="security-info">
+      <strong>🛡️ Güvenlik:</strong> Tüm veriler yalnızca <strong>bu tarayıcıda</strong> AES-256 ile şifreli olarak saklanır. Şifreler hiçbir zaman internete gönderilmez. Verileriniz sadece sizin cihazdadır.
+    </div>
+  </div>
+</div>
+
+<!-- APP SCREEN -->
+<div id="app-screen" class="container">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-logo">LOCKER</span>
+      <span class="topbar-user" id="topbar-email"></span>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="exportPasswords()" title="JSON olarak indir">⬇️ Dışa Aktar</button>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="toggleEmergency()" title="Acil Durum">⚠️</button>
+      <button class="btn btn-ghost btn-sm btn-icon" onclick="handleLogout()" title="Çıkış">🚪</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-label">Toplam Şifre</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-strong" style="color: var(--green)">0</div>
+        <div class="stat-label">Güçlü Şifre</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-weak" style="color: var(--yellow)">0</div>
+        <div class="stat-label">Zayıf Şifre</div>
+      </div>
+    </div>
+
+    <!-- Emergency panel -->
+    <div class="emergency-panel" id="emergency-panel">
+      <div class="emergency-title">🚨 Acil Durum Protokolü</div>
+      <div class="emergency-desc">Şüpheli durum varsa tüm verilerinizi JSON olarak indirin ve kasanızı temizleyin.</div>
+      <div class="emergency-actions">
+        <button class="btn btn-ghost btn-sm" onclick="exportPasswords()">📥 Yedeği İndir</button>
+        <button class="btn btn-danger btn-sm" onclick="emergencyWipe()">🔥 Tüm Verileri Sil</button>
+      </div>
+    </div>
+
+    <!-- Section header -->
+    <div class="section-header">
+      <div>
+        <div class="section-title">Şifre Kasası</div>
+        <div class="count-badge" id="count-label">0 kayıt</div>
+      </div>
+      <button class="btn btn-primary" onclick="openAddModal()">
+        <span>+</span> Yeni Şifre
+      </button>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <span class="input-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Başlık veya kullanıcı adı ara..." oninput="renderPasswords()" />
+    </div>
+
+    <!-- Password list -->
+    <div class="pwd-list" id="pwd-list">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <div style="color: var(--text3); font-family: var(--mono); font-size: 14px;">Locker açılıyor...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Yeni Şifre</div>
+      <button class="btn btn-ghost btn-icon" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-group">
+        <label>Başlık *</label>
+        <div class="input-wrap">
+          <span class="input-icon">🏷️</span>
+          <input type="text" id="f-title" placeholder="örn: Gmail, GitHub, Netflix" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Kullanıcı Adı / E-posta</label>
+        <div class="input-wrap">
+          <span class="input-icon">👤</span>
+          <input type="text" id="f-username" placeholder="kullanici@email.com" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Şifre *</label>
+        <div class="pwd-input-row">
+          <div class="input-wrap" style="flex:1">
+            <span class="input-icon">🔑</span>
+            <input type="text" id="f-password" placeholder="Şifrenizi girin" oninput="updateStrength()" />
+          </div>
+          <button class="btn btn-ghost btn-icon" onclick="generatePassword()" title="Güçlü şifre üret" style="padding: 12px 14px;">🎲</button>
+        </div>
+        <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+        <div class="strength-text" id="strength-text"></div>
+      </div>
+      <div class="field-group">
+        <label>Web Sitesi URL</label>
+        <div class="input-wrap">
+          <span class="input-icon">🌐</span>
+          <input type="url" id="f-url" placeholder="https://example.com" />
+        </div>
+      </div>
+      <div class="field-group">
+        <label>Notlar</label>
+        <textarea id="f-notes" placeholder="Güvenlik soruları, ek bilgiler..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" onclick="savePassword()">
+          <span>💾</span> <span id="save-label">Kaydet</span>
+        </button>
+        <button class="btn btn-ghost" onclick="closeModal()">İptal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===========================
+//  CRYPTO UTILS (AES-256-GCM)
+// ===========================
+async function deriveKey(password, salt) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 200000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function encrypt(data, password) {
+  const enc = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(password, salt);
+  const encrypted = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    key,
+    enc.encode(JSON.stringify(data))
+  );
+  const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+  combined.set(salt, 0);
+  combined.set(iv, 16);
+  combined.set(new Uint8Array(encrypted), 28);
+  return btoa(String.fromCharCode(...combined));
+}
+
+async function decrypt(encryptedStr, password) {
+  try {
+    const combined = Uint8Array.from(atob(encryptedStr), c => c.charCodeAt(0));
+    const salt = combined.slice(0, 16);
+    const iv = combined.slice(16, 28);
+    const data = combined.slice(28);
+    const key = await deriveKey(password, salt);
+    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+    return JSON.parse(new TextDecoder().decode(decrypted));
+  } catch { return null; }
+}
+
+// ===========================
+//  APP STATE
+// ===========================
+let currentEmail = '';
+let masterPass = '';
+let passwords = [];
+let editingId = null;
+
+// ===========================
+//  STORAGE KEYS
+// ===========================
+function storageKey(suffix) { return `locker_${btoa(currentEmail)}_${suffix}`; }
+
+// ===========================
+//  AUTH
+// ===========================
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-master').value;
+
+  if (!email || !pass) { showNotif('E-posta ve şifre gerekli', 'error'); return; }
+  if (pass.length < 4) { showNotif('Şifre en az 4 karakter olmalı', 'error'); return; }
+
+  currentEmail = email;
+  masterPass = pass;
+
+  const storedAuth = localStorage.getItem(`locker_auth_${btoa(email)}`);
+
+  if (storedAuth) {
+    const result = await decrypt(storedAuth, pass);
+    if (!result || result.email !== email) {
+      showNotif('Hatalı şifre!', 'error');
+      return;
+    }
+    showNotif('Hoş geldiniz! 🔓', 'success');
+  } else {
+    const authData = await encrypt({ email, createdAt: Date.now() }, pass);
+    localStorage.setItem(`locker_auth_${btoa(email)}`, authData);
+    showNotif('Hesabınız oluşturuldu! 🎉', 'success');
+  }
+
+  document.getElementById('topbar-email').textContent = email;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+
+  await loadPasswords();
+}
+
+function handleLogout() {
+  currentEmail = '';
+  masterPass = '';
+  passwords = [];
+  document.getElementById('login-screen').style.display = '';
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('login-master').value = '';
+  showNotif('Güvenli çıkış yapıldı', 'success');
+}
+
+// ===========================
+//  PASSWORD STORAGE
+// ===========================
+async function loadPasswords() {
+  document.getElementById('pwd-list').innerHTML = `
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <div style="color:var(--text3);font-family:var(--mono);font-size:14px;">Yükleniyor...</div>
+    </div>`;
+
+  try {
+    const stored = localStorage.getItem(storageKey('passwords'));
+    if (stored) {
+      const decrypted = await decrypt(stored, masterPass);
+      passwords = decrypted || [];
+    } else {
+      passwords = [];
+    }
+  } catch { passwords = []; }
+
+  renderPasswords();
+  updateStats();
+}
+
+async function savePasswords() {
+  const encrypted = await encrypt(passwords, masterPass);
+  localStorage.setItem(storageKey('passwords'), encrypted);
+}
+
+// ===========================
+//  RENDER
+// ===========================
+function renderPasswords() {
+  const query = (document.getElementById('search-input')?.value || '').toLowerCase();
+  const list = document.getElementById('pwd-list');
+
+  let filtered = passwords;
+  if (query) {
+    filtered = passwords.filter(p =>
+      p.title.toLowerCase().includes(query) ||
+      (p.username || '').toLowerCase().includes(query) ||
+      (p.url || '').toLowerCase().includes(query)
+    );
+  }
+
+  document.getElementById('count-label').textContent = `${passwords.length} kayıt${query ? ` · ${filtered.length} sonuç` : ''}`;
+
+  if (filtered.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔒</div>
+        <div class="empty-title">${query ? 'Sonuç bulunamadı' : 'Kasanız boş'}</div>
+        <div class="empty-sub">${query ? 'Farklı bir arama deneyin' : 'İlk şifrenizi ekleyerek başlayın'}</div>
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map((pwd, i) => {
+    const strength = calcStrength(pwd.password);
+    const strengthColor = strength >= 3 ? 'var(--green)' : strength === 2 ? 'var(--yellow)' : 'var(--red)';
+    return `
+    <div class="pwd-card" style="animation-delay: ${i * 0.04}s">
+      <div class="pwd-card-top">
+        <div>
+          <div class="pwd-title">${escHtml(pwd.title)}</div>
+          ${pwd.url ? `<a class="pwd-url" href="${escHtml(pwd.url)}" target="_blank" rel="noopener">${escHtml(pwd.url)}</a>` : ''}
+        </div>
+        <div class="pwd-card-actions">
+          <button class="btn btn-ghost btn-icon btn-sm" onclick="editPassword('${pwd.id}')" title="Düzenle">✏️</button>
+          <button class="btn btn-danger btn-icon btn-sm" onclick="deletePassword('${pwd.id}')" title="Sil">🗑️</button>
+        </div>
+      </div>
+      <div class="pwd-fields">
+        ${pwd.username ? `
+        <div class="pwd-field">
+          <span class="field-label">Kullanıcı</span>
+          <span class="field-value">${escHtml(pwd.username)}</span>
+          <button class="copy-btn" onclick="copyField(this, '${escHtml(pwd.username)}')" title="Kopyala">⎘ kopyala</button>
+        </div>` : ''}
+        <div class="pwd-field">
+          <span class="field-label">Şifre</span>
+          <span class="field-value" id="pw-val-${pwd.id}">••••••••••••</span>
+          <button class="toggle-btn" onclick="togglePwd('${pwd.id}', '${encodeURIComponent(pwd.password)}')" title="Göster/Gizle">👁</button>
+          <button class="copy-btn" onclick="copyField(this, '${encodeURIComponent(pwd.password)}', true)" title="Kopyala">⎘ kopyala</button>
+        </div>
+      </div>
+      ${pwd.notes ? `<div class="pwd-notes">📝 ${escHtml(pwd.notes)}</div>` : ''}
+      <div class="pwd-footer" style="color:${strengthColor}">
+        ${['●','●','●','●','●'].map((d,j) => `<span style="opacity:${j < strength ? 1 : 0.2}">${d}</span>`).join('')}
+        &nbsp;${strengthLabel(strength)} &nbsp;·&nbsp; ${new Date(pwd.updatedAt).toLocaleDateString('tr-TR')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = passwords.length;
+  const strong = passwords.filter(p => calcStrength(p.password) >= 4).length;
+  const weak = passwords.filter(p => calcStrength(p.password) <= 1).length;
+  document.getElementById('stat-strong').textContent = strong;
+  document.getElementById('stat-weak').textContent = weak;
+}
+
+// ===========================
+//  CRUD
+// ===========================
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = 'Yeni Şifre Ekle';
+  document.getElementById('save-label').textContent = 'Kasaya Kaydet';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-username').value = '';
+  document.getElementById('f-password').value = '';
+  document.getElementById('f-url').value = '';
+  document.getElementById('f-notes').value = '';
+  updateStrength();
+  document.getElementById('modal').classList.add('open');
+  setTimeout(() => document.getElementById('f-title').focus(), 100);
+}
+
+function editPassword(id) {
+  const pwd = passwords.find(p => p.id === id);
+  if (!pwd) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = 'Şifreyi Düzenle';
+  document.getElementById('save-label').textContent = 'Değişiklikleri Kaydet';
+  document.getElementById('f-title').value = pwd.title;
+  document.getElementById('f-username').value = pwd.username || '';
+  document.getElementById('f-password').value = pwd.password;
+  document.getElementById('f-url').value = pwd.url || '';
+  document.getElementById('f-notes').value = pwd.notes || '';
+  updateStrength();
+  document.getElementById('modal').classList.add('open');
+}
+
+async function savePassword() {
+  const title = document.getElementById('f-title').value.trim();
+  const password = document.getElementById('f-password').value;
+
+  if (!title) { showNotif('Başlık zorunludur', 'error'); return; }
+  if (!password) { showNotif('Şifre zorunludur', 'error'); return; }
+
+  const entry = {
+    id: editingId || Date.now().toString(36) + Math.random().toString(36).slice(2),
+    title,
+    username: document.getElementById('f-username').value.trim(),
+    password,
+    url: document.getElementById('f-url').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+    createdAt: editingId ? (passwords.find(p => p.id === editingId)?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  if (editingId) {
+    passwords = passwords.map(p => p.id === editingId ? entry : p);
+  } else {
+    passwords = [entry, ...passwords];
+  }
+
+  await savePasswords();
+  renderPasswords();
+  updateStats();
+  closeModal();
+  showNotif(editingId ? 'Şifre güncellendi ✓' : 'Şifre kasaya eklendi ✓', 'success');
+}
+
+async function deletePassword(id) {
+  if (!confirm('Bu şifreyi kalıcı olarak silmek istediğinizden emin misiniz?')) return;
+  passwords = passwords.filter(p => p.id !== id);
+  await savePasswords();
+  renderPasswords();
+  updateStats();
+  showNotif('Şifre silindi', 'success');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+// ===========================
+//  HELPERS
+// ===========================
+function togglePwd(id, encodedPwd) {
+  const el = document.getElementById(`pw-val-${id}`);
+  if (el.textContent === '••••••••••••') {
+    el.textContent = decodeURIComponent(encodedPwd);
+  } else {
+    el.textContent = '••••••••••••';
+  }
+}
+
+async function copyField(btn, val, encoded = false) {
+  const text = encoded ? decodeURIComponent(val) : val;
+  await navigator.clipboard.writeText(text);
+  btn.textContent = '✓ kopyalandı';
+  btn.classList.add('copied');
+  setTimeout(() => {
+    btn.textContent = '⎘ kopyala';
+    btn.classList.remove('copied');
+  }, 2000);
+}
+
+function generatePassword() {
+  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const lower = 'abcdefghijklmnopqrstuvwxyz';
+  const digits = '0123456789';
+  const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+  const all = upper + lower + digits + symbols;
+  let pwd = [
+    upper[Math.floor(Math.random() * upper.length)],
+    lower[Math.floor(Math.random() * lower.length)],
+    digits[Math.floor(Math.random() * digits.length)],
+    symbols[Math.floor(Math.random() * symbols.length)],
+  ];
+  for (let i = 4; i < 20; i++) pwd.push(all[Math.floor(Math.random() * all.length)]);
+  // Shuffle
+  for (let i = pwd.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pwd[i], pwd[j]] = [pwd[j], pwd[i]];
+  }
+  document.getElementById('f-password').value = pwd.join('');
+  updateStrength();
+  showNotif('Güçlü şifre üretildi 🎲', 'success');
+}
+
+function calcStrength(pwd) {
+  if (!pwd) return 0;
+  let score = 0;
+  if (pwd.length >= 8) score++;
+  if (pwd.length >= 14) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+  return score;
+}
+
+function strengthLabel(score) {
+  return ['Çok Zayıf', 'Zayıf', 'Orta', 'Güçlü', 'Çok Güçlü', 'Mükemmel'][score] || '';
+}
+
+function updateStrength() {
+  const pwd = document.getElementById('f-password').value;
+  const score = calcStrength(pwd);
+  const colors = ['#ef4444', '#f97316', '#f59e0b', '#22c55e', '#16a34a', '#15803d'];
+  const widths = [0, 20, 40, 60, 80, 100];
+  document.getElementById('strength-fill').style.background = colors[score];
+  document.getElementById('strength-fill').style.width = widths[score] + '%';
+  document.getElementById('strength-text').style.color = colors[score];
+  document.getElementById('strength-text').textContent = pwd ? strengthLabel(score) : '';
+}
+
+function exportPasswords() {
+  const data = JSON.stringify(passwords, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `locker-backup-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showNotif('Yedek dosyası indirildi ⬇️', 'success');
+}
+
+function toggleEmergency() {
+  document.getElementById('emergency-panel').classList.toggle('open');
+}
+
+function emergencyWipe() {
+  if (!confirm('⚠️ TÜM veriler kalıcı olarak silinecek. Bu işlem GERİ ALINAMAZ! Devam etmek istiyor musunuz?')) return;
+  exportPasswords();
+  localStorage.removeItem(storageKey('passwords'));
+  localStorage.removeItem(`locker_auth_${btoa(currentEmail)}`);
+  passwords = [];
+  handleLogout();
+  showNotif('Tüm veriler silindi', 'success');
+}
+
+// ===========================
+//  NOTIFICATION
+// ===========================
+let notifTimer;
+function showNotif(msg, type = 'success') {
+  const el = document.getElementById('notification');
+  const icons = { success: '✅', error: '❌', warning: '⚠️' };
+  el.textContent = '';
+  el.innerHTML = `<span>${icons[type]}</span> ${escHtml(msg)}`;
+  el.className = `show ${type}`;
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => { el.className = type; }, 3500);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ===========================
+//  KEYBOARD SHORTCUTS
+// ===========================
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('login-screen').style.display !== 'none') {
+    if (document.activeElement.id === 'login-email') {
+      document.getElementById('login-master').focus();
+    } else {
+      handleLogin();
+    }
+  }
+});
+
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('modal')) closeModal();
+});
+</script>
+</body>
+</html>
